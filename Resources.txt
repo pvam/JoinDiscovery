@@ -1,0 +1,12 @@
+The papers that could help us.
+
+ 1. On Random Sampling over Joins -Rajeev Motwani.
+Info : The authors give thought-provoking negative results concerning the problem of estimating results from samples. They also give some algorithms of interest.
+
+add more if you found useful.
+
+
+Some ideas.
+
+1. Hive & Hadoop instead of postgres ? nice support for sampling.
+2. 
