@@ -13,7 +13,7 @@ Step 1 : Eliminate obvious combinations using schema incompatibility.  [DONE]
 
 Step 2: Collect statistics about data and its distribution and do a smart pruning. more thought should be put here to avoid true negativities and false positives.
 
-Step 3: Perform several experiments varying both sampling percentage as well as threshold and experimentally find a pair for which it works the best. This procedure can be repeated several times in order to improve the confidence.
+Step 3: Perform several experiments varying both sampling percentage as well as threshold and experimentally find a pair for which it works the best. This procedure can be repeated several times in order to improve the confidence. (On top of postgres)
 
 
 
