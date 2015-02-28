@@ -8,5 +8,29 @@ add more if you found useful.
 
 Some ideas.
 
-1. Hive & Hadoop instead of postgres ? nice support for sampling.
+1. Hive & Hadoop instead of postgres ? nice support for sampling, partitioning. 
 2. 
+
+
+
+Pruning ideas.
+ideally we should try to avoid both false positives [FP] as well as false negatives. Because of nature sampling ,its not completely possible. Rather we should try to minimize them. For this problem, we should not have any false positives as this is pruning. False negatives are not however a serious problem as they will be filtered correctly in the final step.
+
+Numerical : 
+
+
+Categorical :
+	         First of all, db metadata does not tell us if its string or categorical. we need to write a helper for that. For now lets assume there's one.
+	         
+
+
+
+
+String :  
+	Take a sample of p% and repeat this sampling "t" times , prune this attribute combination if it satisfies the following criterion.
+
+	 SUM(Sample-JOIN(x,y)) <= SOME CONSTANT . (this should be zero to guarantee zero false positives)
+
+	 where Sample-JOIN is the traditional join between Table A's x attribute and Table B's y attribute.  It returns number of rows from Table A which had at-least one match with the rows of Table B.
+
+
