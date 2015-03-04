@@ -31,13 +31,13 @@ ME, CSA, IISc Bangalore}
 
 \section{Problem Statement}
 Given two tables, the join discovery problem is to find out all possible ways in which the two tables can be joined to produce significant results. Each way corresponds to a mapping
-of attributes from one table to the other. The strength of a join for a mapping M from table T1 to T2 is the percentage of rows from T1 that join to some row of T2 under the mapping M. We are interested in finding all the mappings that have support greater than a threshold t. This is a very expensive operation since the number of possible mappings is large i.e, NumberOfAttributes(T1) * NumberOfAttributes(T2). In this project, we are using several techniques to prune subset of those mappings. Intuition is that after the first 2 phases of pruning, whatever the mappigs that survived are going to be very small to compared to the original set. Throughout the pruning we could employ sampling technques and use those same results to finally order results based on join support.
+of attributes from one table to the other. The strength of a join for a mapping M from table T1 to T2 is the percentage of rows from T1 that join to some row of T2 under the mapping M. We are interested in finding all the mappings that have support greater than a threshold t. This is a very expensive operation since the number of possible mappings is very high. Thus, we want to consider sampling techniques for join discovery.
 
 \section{Proposed Technique}
 Lets say we have two data sets namely Table A(a1,a2,....,am) and Table B(b1,b2,....,bn)
 and we want to find potential join attribute pairs between A and B.
 
-Given relation A and B in flat files, our algorithm works in 3 phases.
+Given relation A and B in flat files, our algorithm works in 3 phases. We are using several techniques in each phase to prune subsets of the mappings. After the first 2 phases of pruning, whatever the mappings that survived are going to be very few compared to the original set. Throughout the pruning phases, we could employ sampling techniques and finally order results based on join support.
 
 \subsection{Phase 1}
 
@@ -72,8 +72,10 @@ Collect the following statistics for both relations by a linear scan(sampling ca
 \end{itemize}
 
 
-    We can use \textbf{Pearson product-moment correlation coefficient} to study the relationship between the two attributes, if theres a negative coorealtion we can prune it with high confidence.
-   Other approcahes are also possible. For example, we can compare statistics of relations A and B. If a pair is not a join pair, it is likely that above parameter values differ significantly. For example, mean value differs by a huge margin when age attribute of table A is compared with zipcode attribute of table B. How much statistics should differ for eliminating a combination needs to be studied further. For instance, we can assign a weight to each of the above parameter and find the weighted sum $W$. If $W$ is above some threshold, it is a potential join pair. Otherwise we can prune it with high confidence. This weighted sum can also be used along with join support to order the results at later stage.
+    We can \textbf{compare statistics} of relations A and B. If a pair is not a join pair, it is likely that above parameter values differ significantly. For example, mean value differs by a huge margin when age attribute of table A is compared with zip-code attribute of table B. How much statistics should differ for eliminating a combination needs to be studied further. For instance, we can assign a weight to each of the above parameter and find the weighted sum $W$. If $W$ is above some threshold, it is a potential join pair. Otherwise we can prune it with high confidence. This weighted sum can also be used along with join support to order the results at later stage.
+    
+   Other approaches are also possible. For example, we can use \textbf{Pearson product-moment correlation coefficient} to study the relationship between the two attributes, if there is a negative correlation we can prune it with high confidence.
+
    
 \paragraph{String}
 
@@ -96,7 +98,7 @@ Compute sum of support. If it is less than $\alpha$ times ideal sum of support$(
 \begin{itemize}
 
 
-\item \textbf{Categorical attributes} Database metadata does not tell us if its string or categorical. we need to write a helper for that. For now lets assume there's one. 	         Since the number of categories are limited, so its not unique which implies that sampling can work well.
+\item \textbf{Categorical attributes} Database meta-data does not tell us if its string or categorical. we need to write a helper for that. For now lets assume there's one. 	         Since the number of categories are limited, so its not unique which implies that sampling can work well.
 
 \item We expect that $Sample-JOIN(a1,b1)$ will be close to scaled-threshold (which is $t * s$) , to avoid False Negatives we will run this for $c$ times. So $SUM(Sample-JOIN(x,y)) >= (t * s * c * size(A) * alpha)$ should hold. Intuitively it specifies how strict the condition is, if its 1 the algorithm expects that in all runs of sampling we get at-least the scaled-threshold.  The idea is to set it to something like $1/2$ or $3/4$ so that even if in some run the algorithm has less than scaled-threshold it will pass this phase.
 \end{itemize}
@@ -105,16 +107,18 @@ Compute sum of support. If it is less than $\alpha$ times ideal sum of support$(
 We muse consolidate the findings of phase 1 and phase 2 and present potential join pairs in support percentage order.
 \section{Experiments}
 
-Hive(When partitoned on a column) or PostgreSQL. Has good support for sampling, partitioning. 
+Hive(When partitioned on a column) or PostgreSQL. Has good support for sampling, partitioning. 
 
-In order to evaluate our approach we are comparing our approach with the \textit{oracle's} approach which beforehand knows the support count of all pairs( using full table scan instead of sampling). We are interested in finding the following result.
+In order to evaluate our approach we are comparing our approach with the \textit{Oracle's} approach which beforehand knows the support count of all pairs(using naive join approach instead of sampling). 
+
+We are interested in finding answers to following questions from our formulation and experiments.
 
 \begin{itemize}
 
-\item \textbf{How does the sample results correspond to the original results? } How can we ensure that sample has \item \textit{almost} the same probability distribution as that of original data? 
+\item How sampling strategies affect results? What meta-data needs to be computed and how it could be useful?
+
+\item How do the supports computed from the sample relate to the actual supports?
 
 \end{itemize}
-
-
 
 \end{document}
