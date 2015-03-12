@@ -59,3 +59,12 @@ Actual Vs Estimation
 
 Histograms
 ---------
+
+See slide 16-17 http://www.itu.dk/people/pagh/DBT09/04-size-estimation.pdf
+
+The idea is to build k independent random histograms (using hashing 1..k functions) 
+Ans sel(A=x) = min i (Val i (h i[x] ) ); 
+
+try this also .There's a worst case guarntee with some probability. 
+
+experiment to be done : 
