@@ -34,3 +34,28 @@ String :
 	 where Sample-JOIN is the traditional join between Table A's x attribute and Table B's y attribute.  It returns number of rows from Table A which had at-least one match with the rows of Table B.
 
 
+
+
+Date : 12 March
+--------------
+ 
+Our problem now is to estimate the join sizes R1x join R2y
+suppose that we have a method to estimate selecitvity of an attribute
+then ans  = Sel(r1x == r2y )* |R1| * |R2|
+
+Where sel(Predicates) = product of individual predicates.
+
+Sel(attr =X) =  ( 1/ Number of distnct values) 
+Above assumes uniform distribtuion. 
+
+So ans becomes = (1/d1) * (1/ d2) * |R1|*|R2|.
+d1 and d2 are distnct values in R1 and R2 resp.
+
+Uniform assumption might be a problem but how close this result estimation is? 
+
+Experiment to be done : 
+
+Actual Vs Estimation 
+
+Histograms
+---------
