@@ -3,16 +3,18 @@ import java.sql.*;
 public class Main {
 
 	static String databaseURL = "jdbc:postgresql://localhost:5432/health";
-	static String databaseUser = "rajmohan";
-	static String databasePassword = "";
+	static String databaseUser = "postgres";
+	static String databasePassword = "a";
 	static Connection connection;
 	static boolean [][] dataTypeCompatibilityMatrix;
 	static int table1NoOfAttrs;
 	static int table2NoOfAttrs;
 	static String[] table1AttrTypes;
 	static String[] table2AttrTypes;
+	
 	static String table1Name = "test3";
 	static String table2Name = "test4";
+	
 	public static void init()
 	{
 		connectDB();
@@ -46,9 +48,10 @@ public class Main {
 	public static void main(String... args)
 	{
 		init();
-		ProcessData.doStep1();
-		
-//		printData();
+		ProcessData.Bifocal_Sampling();
+//		ProcessData.doStep1();
+//		ProcessData.doStep2();
+		//printData();
 	}
 	
 	static void printData()

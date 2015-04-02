@@ -1,8 +1,0 @@
-
-// for fetching data type
-select * from information_schema.columns where table_name='test3';
-
-// for fetching statistics
-select * from pg_stats where table_name = 'test3';
-
-
