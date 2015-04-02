@@ -2,7 +2,7 @@
 <classpath>
 	<classpathentry kind="src" path="src"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
-	<classpathentry kind="lib" path="D:/TIDS/Orestes-Bloomfilter-master/dist/bloom-filter-1.0.3.jar"/>
-	<classpathentry kind="lib" path="D:/TIDS/Join_Discovery java project/Join_Discovery/jars/postgresql-9.4-1200.jdbc4.jar"/>
+	<classpathentry kind="lib" path="jars/bloom-filter-1.0.3.jar"/>
+	<classpathentry kind="lib" path="jars/postgresql-9.4-1200.jdbc4.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
