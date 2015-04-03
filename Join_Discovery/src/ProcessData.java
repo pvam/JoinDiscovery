@@ -1,7 +1,9 @@
 import java.sql.ResultSet;
 import java.sql.Statement;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 import orestes.bloomfilter.BloomFilter;
@@ -10,18 +12,22 @@ import orestes.bloomfilter.FilterBuilder;
 public class ProcessData {
 
 	public static void doStep1() {
-		fillTableTypes(Main.table1Name, Main.table1AttrTypes);
-		fillTableTypes(Main.table2Name, Main.table2AttrTypes);
+		fillTableTypes(Main.table1Name, Main.table1AttrTypes,
+				Main.table1AttrNames);
+		fillTableTypes(Main.table2Name, Main.table2AttrTypes,
+				Main.table2AttrNames);
 
 		for (int i = 0; i < Main.table1NoOfAttrs; i++) {
 			for (int j = 0; j < Main.table2NoOfAttrs; j++) {
-				if (Main.table1AttrTypes[i] == Main.table2AttrTypes[j])
+				if (Main.table1AttrTypes[i] == Main.table2AttrTypes[j]) {
 					Main.dataTypeCompatibilityMatrix[i][j] = true;
+				}
 			}
 		}
-		print_matrix();
+		// print_matrix();
 	}
 
+	// Not used.
 	public static void doStep2() {
 		double variance1 = computeVariance("Longitude", "test4");
 		double variance2 = computeVariance("capacity", "test4");
@@ -55,37 +61,53 @@ public class ProcessData {
 
 	private static void print_matrix() {
 		int prunedOut = 0;
+		for (int i = 0; i < Main.table1NoOfAttrs; ++i) {
+			System.out.print(Main.table1AttrNames[i] + "  ");
+		}
+		System.out.println();
+		for (int i = 0; i < Main.table2NoOfAttrs; ++i) {
+			System.out.print(Main.table2AttrNames[i] + "  ");
+		}
+		System.out.println();
+
 		for (int i = 0; i < Main.table1NoOfAttrs; i++) {
 			for (int j = 0; j < Main.table2NoOfAttrs; j++) {
-				System.out.print(Main.dataTypeCompatibilityMatrix[i][j] + "  ");
-				if (!Main.dataTypeCompatibilityMatrix[i][j])
+				System.out.print(Main.dataTypeCompatibilityMatrix[i][j] ? "T "
+						: "F ");
+				if (!Main.dataTypeCompatibilityMatrix[i][j]) {
 					prunedOut++;
+				}
 			}
 			System.out.println();
 		}
 
 		System.out
-				.println("\nPruned Out Percentage = "
-						+ 100
-						* ((double) prunedOut / (Main.table1NoOfAttrs * Main.table2NoOfAttrs)));
+		.println("\nPruned Out Percentage = "
+				+ 100
+				* ((double) prunedOut / (Main.table1NoOfAttrs * Main.table2NoOfAttrs)));
 	}
 
-	private static void fillTableTypes(String tableName, String[] tableAttrTypes) {
+	private static void fillTableTypes(String tableName,
+			String[] tableAttrTypes, String[] tableAttrNames) {
 		Statement st;
 		ResultSet rs;
 		int idx = 0;
 		try {
 			st = Main.connection.createStatement();
-			rs = st.executeQuery("select data_type from information_schema.columns where table_name = '"
+			rs = st.executeQuery("select data_type,column_name from information_schema.columns where table_name = '"
 					+ tableName + "'");
 
 			while (rs.next()) {
 				String dType = rs.getString(1);
+				String attrName = rs.getString(2);
 
 				// to handle character and character varying types
-				if (dType.startsWith("character"))
+				if (dType.startsWith("character")) {
 					dType = "string";
-				tableAttrTypes[idx++] = dType;
+				}
+				tableAttrTypes[idx] = dType;
+				tableAttrNames[idx] = attrName;
+				++idx;
 			}
 			rs.close();
 			st.close();
@@ -105,23 +127,24 @@ public class ProcessData {
 		bifocalSupport(source, sourceName, target, targetName, m);
 		DenseSupport(source, sourceName, target, targetName, m);
 		SparseSupport(source, sourceName, target, targetName, m);
-		sparseSupportWithTargetScaling(source, sourceName, target, targetName,m);
+		sparseSupportWithTargetScaling(source, sourceName, target, targetName,
+				m);
 		SampleBoth_Estimation(source, sourceName, target, targetName, m);
-		
+
 		System.out.println();
 		sparseSupportWithBloomFilter(source, sourceName, target, targetName, m);
 	}
 
-	private static void sparseSupportWithBloomFilter(String source,
+	private static double sparseSupportWithBloomFilter(String source,
 			String sourceName, String target, String targetName, double m) {
 		double support = 0;
 		String querySource = "select " + sourceName + " from " + source
-				+ " where random() < " + (double) m;
+				+ " where random() < " + m;
 		String queryTarget = "select " + targetName + " from " + target;
 		ArrayList<String> R = new ArrayList<String>();
 
 		BloomFilter<String> S = new FilterBuilder(20000, 0.1)
-				.buildBloomFilter();
+		.buildBloomFilter();
 
 		Statement st;
 		ResultSet rs;
@@ -130,7 +153,10 @@ public class ProcessData {
 			rs = st.executeQuery(querySource);
 
 			while (rs.next()) {
-				R.add(rs.getString(1));
+				String next = rs.getString(1);
+				if (next != null) {
+					R.add(next);
+				}
 			}
 			rs.close();
 
@@ -138,23 +164,31 @@ public class ProcessData {
 
 			while (rs.next()) {
 				String next = rs.getString(1);
-				if(next != null)
-				S.add(next);
+				if (next != null) {
+					S.add(next);
+				}
 			}
 			rs.close();
 			st.close();
 
 			for (String str : R) {
-				if (S.contains(str))
+				if (S.contains(str)) {
 					support++;
+				}
 			}
 
 			support = (1 / m) * support;
-			System.out.println("sparseSupportWithBloomFilter : " + support
-					+ ", Sampling : " + m);
+			// System.out.println("sparseSupportWithBloomFilter : " + support+
+			// ", Sampling : " + m);
+
+			// TODO : get actual count, provide a sanity bound in-case it
+			// exceeds count.
+			return support;
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
+
+		return -1;
 	}
 
 	private static void sparseSupportWithTargetScaling(String source,
@@ -189,8 +223,9 @@ public class ProcessData {
 			}
 
 			for (String s : sample1List) {
-				if (sample2List.contains(s))
+				if (sample2List.contains(s)) {
 					support++;
+				}
 			}
 			support = support * (1 / m);
 			// Modify to also take target scaling into account
@@ -218,7 +253,7 @@ public class ProcessData {
 
 	}
 
-	private static void actualSupport(String source, String sourceName,
+	private static double actualSupport(String source, String sourceName,
 			String target, String targetName, double m) {
 
 		String querySource = "select count(*) from " + source + " where "
@@ -232,12 +267,14 @@ public class ProcessData {
 			rs = st.executeQuery(querySource);
 
 			if (rs.next()) {
-				System.out.println("Actual support = " + rs.getString(1));
-				return;
+				double val = Double.parseDouble(rs.getString(1));
+				// System.out.println("Actual support = " + val);
+				return val;
 			}
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
+		return -1;
 	}
 
 	private static void bifocalJoinSize(String target, String targetName,
@@ -288,7 +325,7 @@ public class ProcessData {
 		double result = 0.0;
 		double support = 0;
 		String querySource = "select " + sourceName + " from " + source
-				+ " where random() < " + (double) m;
+				+ " where random() < " + m;
 		String queryTarget = "select " + targetName + " from " + target;
 		ArrayList<String> R = new ArrayList<String>();
 		ArrayList<String> S = new ArrayList<String>();
@@ -314,8 +351,9 @@ public class ProcessData {
 			st.close();
 
 			for (String str : R) {
-				if (S.contains(str))
+				if (S.contains(str)) {
 					support++;
+				}
 			}
 
 			support = (1 / m) * support;
@@ -332,7 +370,7 @@ public class ProcessData {
 		double support = 0;
 		String querySource = "select " + sourceName + " from " + source;
 		String queryTarget = "select " + targetName + " from " + target
-				+ " where random() < " + (double) m;
+				+ " where random() < " + m;
 		ArrayList<String> R = new ArrayList<String>();
 		ArrayList<String> S = new ArrayList<String>();
 		Statement st;
@@ -357,8 +395,9 @@ public class ProcessData {
 			st.close();
 
 			for (String str : S) {
-				if (R.contains(str))
+				if (R.contains(str)) {
 					support++;
+				}
 			}
 
 			support = (1 / m) * support;
@@ -377,9 +416,9 @@ public class ProcessData {
 		ArrayList<String> sample2List = new ArrayList<String>();
 
 		String querySource = "select " + sourceName + " from " + source
-				+ " where random() < " + (double) m;
+				+ " where random() < " + m;
 		String queryTarget = "select " + targetName + " from " + target
-				+ " where random() < " + (double) m;
+				+ " where random() < " + m;
 		Statement st;
 		ResultSet rs;
 		ArrayList<String> Vstar;
@@ -415,9 +454,9 @@ public class ProcessData {
 		ArrayList<String> sample2List = new ArrayList<String>();
 
 		String querySource = "select " + sourceName + " from " + source
-				+ " where random() < " + (double) m;
+				+ " where random() < " + m;
 		String queryTarget = "select " + targetName + " from " + target
-				+ " where random() < " + (double) m;
+				+ " where random() < " + m;
 		Statement st;
 		ResultSet rs;
 		ArrayList<String> Vstar;
@@ -438,8 +477,9 @@ public class ProcessData {
 			rs.close();
 			st.close();
 			for (String s : sample1List) {
-				if (sample2List.contains(s))
+				if (sample2List.contains(s)) {
 					support++;
+				}
 			}
 			support = support * (1 / m);
 			System.out.println("SampleBoth_Estimation " + support
@@ -454,10 +494,103 @@ public class ProcessData {
 		ArrayList<String> resultList = new ArrayList<String>();
 
 		for (String s : sample1List) {
-			if (sample2List.contains(s))
+			if (sample2List.contains(s)) {
 				resultList.add(s);
+			}
 		}
 
 		return resultList;
+	}
+
+	public static void doStep3() {
+		String R = Main.table1Name;
+		String S = Main.table2Name;
+		// Sampling percentage
+		double m = 0.1;
+		for (int i = 0; i < Main.table1NoOfAttrs; ++i) {
+			for (int j = 0; j < Main.table2NoOfAttrs; ++j) {
+				if (Main.dataTypeCompatibilityMatrix[i][j]) {
+					String src = Main.table1AttrNames[i];
+					String dest = Main.table2AttrNames[j];
+					// have to consider both pairs
+					double support = sparseSupportWithBloomFilter(R, src, S,
+							dest, m);
+					Main.all.add(new Pair(src, dest, support));
+				}
+			}
+		}
+
+		Collections.sort(Main.all);
+		/*
+		 * for (Pair cur : Main.all) { System.out.println(cur.toString()); }
+		 */
+
+		// What threshold value to set - to be studied. 10% is okay?
+
+		double threshold = 0.1;
+
+		double minSupport = Main.all.get(Main.all.size() - 1).support
+				* threshold;
+
+		System.out.println("Using source sampling + target bloom filter");
+		System.out
+				.println("========================================================");
+		System.out.println("pairs which satisfy support threshold : "
+				+ minSupport);
+
+		for (Pair cur : Main.all) {
+			if (cur.support >= minSupport) {
+				System.out.println(cur.toString());
+			}
+		}
+
+		System.out
+				.println("========================================================");
+
+	}
+
+	public static void doStep3WithActualSupport() {
+		String R = Main.table1Name;
+		String S = Main.table2Name;
+		// Sampling percentage
+		List<Pair> all = new ArrayList<Pair>();
+		double m = 0.1;
+		for (int i = 0; i < Main.table1NoOfAttrs; ++i) {
+			for (int j = 0; j < Main.table2NoOfAttrs; ++j) {
+				if (Main.dataTypeCompatibilityMatrix[i][j]) {
+					String src = Main.table1AttrNames[i];
+					String dest = Main.table2AttrNames[j];
+					// have to consider both pairs
+					double support = actualSupport(R, src, S, dest, m);
+					all.add(new Pair(src, dest, support));
+				}
+			}
+		}
+
+		Collections.sort(all);
+		/*
+		 * for (Pair cur : all) { System.out.println(cur.toString()); }
+		 */
+
+		// What threshold value to set - to be studied. 10% is okay?
+
+		double threshold = 0.1;
+
+		double minSupport = all.get(all.size() - 1).support * threshold;
+
+		System.out.println("Using actual support method");
+		System.out
+				.println("========================================================");
+		System.out.println("pairs which satisfy support threshold : "
+				+ minSupport);
+
+		for (Pair cur : all) {
+			if (cur.support >= minSupport) {
+				System.out.println(cur.toString());
+			}
+		}
+		System.out
+		.println("========================================================");
+
 	}
 }
