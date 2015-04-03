@@ -18,10 +18,13 @@ public class Main {
 	static String[] table1AttrTypes, table1AttrNames;
 	static String[] table2AttrTypes, table2AttrNames;
 
-	static String table1Name = "test3";
-	static String table2Name = "test4";
+	static String table1Name = "test4";
+	static String table2Name = "test3";
 
 	static List<Pair> all;
+	public static double fpProbability = 0.1;
+	public static int targetrelSize = 8000;
+	public static int threshold = (int) (targetrelSize * 0.1);
 
 	public static void init() {
 		connectDB();

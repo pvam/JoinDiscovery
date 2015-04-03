@@ -11,7 +11,7 @@ public class Pair implements Comparable<Pair> {
 
 	@Override
 	public int compareTo(Pair n) {
-		return Double.compare(support, n.support);
+		return Double.compare(n.support, support);
 	}
 
 	@Override

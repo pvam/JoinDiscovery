@@ -132,19 +132,17 @@ public class ProcessData {
 		SampleBoth_Estimation(source, sourceName, target, targetName, m);
 
 		System.out.println();
-		sparseSupportWithBloomFilter(source, sourceName, target, targetName, m);
+		// sparseSupportWithBloomFilter(source, sourceName, target, targetName,
+		// m);
 	}
 
 	private static double sparseSupportWithBloomFilter(String source,
-			String sourceName, String target, String targetName, double m) {
+			String sourceName, String target, String targetName, double m,
+			BloomFilter<String> S) {
 		double support = 0;
 		String querySource = "select " + sourceName + " from " + source
 				+ " where random() < " + m;
-		String queryTarget = "select " + targetName + " from " + target;
 		ArrayList<String> R = new ArrayList<String>();
-
-		BloomFilter<String> S = new FilterBuilder(20000, 0.1)
-		.buildBloomFilter();
 
 		Statement st;
 		ResultSet rs;
@@ -156,16 +154,6 @@ public class ProcessData {
 				String next = rs.getString(1);
 				if (next != null) {
 					R.add(next);
-				}
-			}
-			rs.close();
-
-			rs = st.executeQuery(queryTarget);
-
-			while (rs.next()) {
-				String next = rs.getString(1);
-				if (next != null) {
-					S.add(next);
 				}
 			}
 			rs.close();
@@ -507,39 +495,55 @@ public class ProcessData {
 		String S = Main.table2Name;
 		// Sampling percentage
 		double m = 0.1;
-		for (int i = 0; i < Main.table1NoOfAttrs; ++i) {
-			for (int j = 0; j < Main.table2NoOfAttrs; ++j) {
+		for (int j = 0; j < Main.table2NoOfAttrs; ++j) {
+			String dest = Main.table2AttrNames[j];
+			BloomFilter<String> bloom = new FilterBuilder(Main.targetrelSize,
+					Main.fpProbability).buildBloomFilter();
+			String queryTarget = "select " + dest + " from " + S;
+			Statement st;
+			ResultSet rs;
+			try {
+				st = Main.connection.createStatement();
+				rs = st.executeQuery(queryTarget);
+
+				while (rs.next()) {
+					String next = rs.getString(1);
+					if (next != null) {
+						bloom.add(next);
+					}
+				}
+				rs.close();
+				st.close();
+
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+			for (int i = 0; i < Main.table1NoOfAttrs; ++i) {
 				if (Main.dataTypeCompatibilityMatrix[i][j]) {
 					String src = Main.table1AttrNames[i];
-					String dest = Main.table2AttrNames[j];
 					// have to consider both pairs
 					double support = sparseSupportWithBloomFilter(R, src, S,
-							dest, m);
+							dest, m, bloom);
 					Main.all.add(new Pair(src, dest, support));
 				}
 			}
 		}
 
 		Collections.sort(Main.all);
-		/*
-		 * for (Pair cur : Main.all) { System.out.println(cur.toString()); }
-		 */
+		for (Pair cur : Main.all) {
+			System.out.println(cur.toString());
+		}
 
 		// What threshold value to set - to be studied. 10% is okay?
-
-		double threshold = 0.1;
-
-		double minSupport = Main.all.get(Main.all.size() - 1).support
-				* threshold;
 
 		System.out.println("Using source sampling + target bloom filter");
 		System.out
 				.println("========================================================");
 		System.out.println("pairs which satisfy support threshold : "
-				+ minSupport);
+				+ Main.threshold);
 
 		for (Pair cur : Main.all) {
-			if (cur.support >= minSupport) {
+			if (cur.support >= Main.threshold) {
 				System.out.println(cur.toString());
 			}
 		}
@@ -574,18 +578,14 @@ public class ProcessData {
 
 		// What threshold value to set - to be studied. 10% is okay?
 
-		double threshold = 0.1;
-
-		double minSupport = all.get(all.size() - 1).support * threshold;
-
 		System.out.println("Using actual support method");
 		System.out
 				.println("========================================================");
 		System.out.println("pairs which satisfy support threshold : "
-				+ minSupport);
+				+ Main.threshold);
 
 		for (Pair cur : all) {
-			if (cur.support >= minSupport) {
+			if (cur.support >= Main.threshold) {
 				System.out.println(cur.toString());
 			}
 		}
