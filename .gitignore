@@ -15,7 +15,10 @@ local.properties
 .classpath
 .settings/
 .loadpath
-.class
+*.class
+.idea/
+*.eml
+*.iml
 
 # External tool builders
 .externalToolBuilders/
@@ -215,3 +218,4 @@ pip-log.txt
 
 #Mr Developer
 .mr.developer.cfg
+*.class
