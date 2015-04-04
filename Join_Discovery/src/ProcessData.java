@@ -486,7 +486,7 @@ public class ProcessData {
 		return resultList;
 	}
 
-	public static void doStep3WithBloom() {
+	public static void doStep3SourceOnlyWithBloom() {
 		String R = Main.table1Name;
 		String S = Main.table2Name;
 		// Sampling percentage
@@ -519,6 +519,8 @@ public class ProcessData {
 				if (Main.dataTypeCompatibilityMatrix[i][j]) {
 					String src = Main.table1AttrNames[i];
 					// have to consider both pairs
+					if(Main.debugMode)
+						System.out.println(src + " vs " + dest);
 					double support = sparseSupportWithBloomFilter(R, src, S,
 							dest, m, bloom);
 					Main.all.add(new Pair(src, dest, support));
@@ -619,8 +621,11 @@ public class ProcessData {
 			}
 			for (int i = 0; i < Main.table1NoOfAttrs; ++i) {
 				if (Main.dataTypeCompatibilityMatrix[i][j]) {
+					
 					String src = Main.table1AttrNames[i];
 					// have to consider both pairs
+					if(Main.debugMode)
+						System.out.println(src + " vs " + dest);
 					double support = sparseSupportWithTargetScalingBloom(R, src, S,	dest, m, bloom,sampleDistinctCount,completeDistinctCount);
 					Main.all.add(new Pair(src, dest, support));
 				}
@@ -780,6 +785,8 @@ public class ProcessData {
 					String src = Main.table1AttrNames[i];
 					String dest = Main.table2AttrNames[j];
 					// have to consider both pairs
+					if(Main.debugMode)
+						System.out.println(src + " vs " + dest);
 					double support = actualSupport(R, src, S, dest, m);
 					all.add(new Pair(src, dest, support));
 				}
