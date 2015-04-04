@@ -8,9 +8,9 @@ import java.util.List;
 
 public class Main {
 
-	static String databaseURL = "jdbc:postgresql://localhost:5432/health";
-	static String databaseUser = "postgres";
-	static String databasePassword = "a";
+	static String databaseURL = "jdbc:postgresql://localhost:5432/tpch";
+	static String databaseUser = "rajmohan";
+	static String databasePassword = "";
 	static Connection connection;
 	static boolean[][] dataTypeCompatibilityMatrix;
 	static int table1NoOfAttrs;
@@ -18,14 +18,15 @@ public class Main {
 	static String[] table1AttrTypes, table1AttrNames;
 	static String[] table2AttrTypes, table2AttrNames;
 
-	static String table1Name = "test4";
-	static String table2Name = "test3";
+	static String table1Name = "customer";
+	static String table2Name = "orders";
 
 	static List<Pair> all;
 	public static double fpProbability = 0.1;
-	public static int targetrelSize = 8000;
-	public static int threshold = (int) (targetrelSize * 0.1);
-
+	public static int targetrelSize = 1500000;
+	public static int threshold = 15000;//(int) (targetrelSize * 0.1);
+	public static double sampleValue = 0.2;
+	public static final boolean debugMode = true; 
 	public static void init() {
 		connectDB();
 		table1NoOfAttrs = getNoOfAttributes(table1Name);
@@ -62,8 +63,16 @@ public class Main {
 		// TODO: Yet to be implemented
 		// ProcessData.doStep2();
 		// printData();
-		ProcessData.doStep3WithActualSupport();
-		ProcessData.doStep3();
+		System.out.printf("\n\n");
+//		ProcessData.doStep3WithActualSupport();
+		
+		System.out.printf("\n\n");
+//	    ProcessData.doStep3WithBloom();
+	    System.out.printf("\n\n");
+		ProcessData.doStep3WithTargetScaling();
+
+	    System.out.printf("\n\n");
+//		ProcessData.doStep3WithTargetScalingWithoutBloom();
 		// ProcessData.Bifocal_Sampling();
 	}
 

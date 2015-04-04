@@ -19,12 +19,14 @@ public class ProcessData {
 
 		for (int i = 0; i < Main.table1NoOfAttrs; i++) {
 			for (int j = 0; j < Main.table2NoOfAttrs; j++) {
-				if (Main.table1AttrTypes[i] == Main.table2AttrTypes[j]) {
+				if (Main.table1AttrTypes[i].equalsIgnoreCase(Main.table2AttrTypes[j])) 
+				{
 					Main.dataTypeCompatibilityMatrix[i][j] = true;
 				}
 			}
 		}
-		// print_matrix();
+		if(Main.debugMode)
+		 print_matrix();
 	}
 
 	// Not used.
@@ -61,15 +63,19 @@ public class ProcessData {
 
 	private static void print_matrix() {
 		int prunedOut = 0;
+		System.out.println("Source Attributes List");
 		for (int i = 0; i < Main.table1NoOfAttrs; ++i) {
 			System.out.print(Main.table1AttrNames[i] + "  ");
 		}
 		System.out.println();
+		System.out.println();
+		System.out.println("Target Attributes List");
 		for (int i = 0; i < Main.table2NoOfAttrs; ++i) {
 			System.out.print(Main.table2AttrNames[i] + "  ");
 		}
 		System.out.println();
-
+		System.out.println();
+		System.out.println("Datatype compatibility matrix");
 		for (int i = 0; i < Main.table1NoOfAttrs; i++) {
 			for (int j = 0; j < Main.table2NoOfAttrs; j++) {
 				System.out.print(Main.dataTypeCompatibilityMatrix[i][j] ? "T "
@@ -118,7 +124,7 @@ public class ProcessData {
 	}
 
 	public static void Bifocal_Sampling() {
-		double m = 0.1;
+		double m = Main.sampleValue;
 
 		String source = "test4", sourceName = "county";
 		String target = "test3", targetName = "county_name";
@@ -127,8 +133,7 @@ public class ProcessData {
 		bifocalSupport(source, sourceName, target, targetName, m);
 		DenseSupport(source, sourceName, target, targetName, m);
 		SparseSupport(source, sourceName, target, targetName, m);
-		sparseSupportWithTargetScaling(source, sourceName, target, targetName,
-				m);
+		//sparseSupportWithTargetScaling(source, sourceName, target, targetName,m);
 		SampleBoth_Estimation(source, sourceName, target, targetName, m);
 
 		System.out.println();
@@ -179,8 +184,8 @@ public class ProcessData {
 		return -1;
 	}
 
-	private static void sparseSupportWithTargetScaling(String source,
-			String sourceName, String target, String targetName, double m) {
+	private static double sparseSupportWithTargetScaling(String source,
+			String sourceName, String target, String targetName, double m,int completeDistinctCount) {
 		double support = 0;
 		ArrayList<String> sample1List = new ArrayList<String>();
 		ArrayList<String> sample2List = new ArrayList<String>();
@@ -191,7 +196,6 @@ public class ProcessData {
 				+ " where random() < " + m;
 		Statement st;
 		ResultSet rs;
-		ArrayList<String> Vstar;
 		Set<String> disinctitem = new HashSet<String>();
 		try {
 			st = Main.connection.createStatement();
@@ -219,26 +223,18 @@ public class ProcessData {
 			// Modify to also take target scaling into account
 
 			int sampleDistinctSize = disinctitem.size();
-			int totalDisinctSize = -1;
-			// Number of distinct entries in whole column, can be obtained
-			// through statistics of table.
-			String distinctQuery = "select count(distinct " + targetName
-					+ " ) from " + target;
-			rs = st.executeQuery(distinctQuery);
-			if (rs.next()) {
-				totalDisinctSize = Integer.parseInt(rs.getString(1));
-			}
-
-			support *= (totalDisinctSize / sampleDistinctSize);
-			System.out.println("sparseSupportWithTargetScaling :" + support
-					+ ", sampling: " + m);
+			if(sampleDistinctSize !=0)
+			support *= (completeDistinctCount / sampleDistinctSize);
+//			System.out.println("sparseSupportWithTargetScaling :" + support
+//					+ ", sampling: " + m);
 
 			rs.close();
 			st.close();
+			return support;
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
-
+		return -1;
 	}
 
 	private static double actualSupport(String source, String sourceName,
@@ -490,14 +486,15 @@ public class ProcessData {
 		return resultList;
 	}
 
-	public static void doStep3() {
+	public static void doStep3WithBloom() {
 		String R = Main.table1Name;
 		String S = Main.table2Name;
 		// Sampling percentage
-		double m = 0.1;
+		double m = Main.sampleValue;
 		for (int j = 0; j < Main.table2NoOfAttrs; ++j) {
 			String dest = Main.table2AttrNames[j];
-			BloomFilter<String> bloom = new FilterBuilder(Main.targetrelSize,
+			// First prmtr is BF size in terms of bits
+			BloomFilter<String> bloom = new FilterBuilder(2 * Main.targetrelSize,
 					Main.fpProbability).buildBloomFilter();
 			String queryTarget = "select " + dest + " from " + S;
 			Statement st;
@@ -527,18 +524,22 @@ public class ProcessData {
 					Main.all.add(new Pair(src, dest, support));
 				}
 			}
+			bloom.clear();
 		}
 
 		Collections.sort(Main.all);
-		for (Pair cur : Main.all) {
-			System.out.println(cur.toString());
+		if(Main.debugMode)
+		{
+			for (Pair cur : Main.all) {
+				System.out.println(cur.toString());
+			}
 		}
 
 		// What threshold value to set - to be studied. 10% is okay?
 
+		
+		System.out.println("<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<");
 		System.out.println("Using source sampling + target bloom filter");
-		System.out
-				.println("========================================================");
 		System.out.println("pairs which satisfy support threshold : "
 				+ Main.threshold);
 
@@ -548,9 +549,223 @@ public class ProcessData {
 			}
 		}
 
-		System.out
-				.println("========================================================");
+		System.out.println(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>");
+		Main.all.clear();
+	}
+	
+	public static void doStep3WithTargetScaling() 
+	{
+		String R = Main.table1Name;
+		String S = Main.table2Name;
+		
+		// Sampling percentage
+		double m = Main.sampleValue;
+		for (int j = 0; j < Main.table2NoOfAttrs; ++j) 
+		{
+			int completeDistinctCount = 0;
+			int sampleDistinctCount = 0;
+			Statement st;
+			ResultSet rs;
+			String dest = Main.table2AttrNames[j];
+			// First prmtr is BF size in terms of bits
+			BloomFilter<String> bloom = new FilterBuilder(2 * Main.targetrelSize,
+					Main.fpProbability).buildBloomFilter();
+			
+			
+			//1. Find distinct count of complete relation using query.
+			
+			String queryDistCnt = "select count(distinct " + dest + " ) from " + S ;
+			
+			try 
+			{
+				st = Main.connection.createStatement();
+				rs = st.executeQuery(queryDistCnt);
+				if(rs.next())
+				  completeDistinctCount = Integer.parseInt(rs.getString(1));
+				rs.close();
+				st.close();
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+			
+			
+			//2. Find distinct count of sample relation using Set 
+			String querySampleDistinct = "select " + dest + " from " + S + " where random() < " + Main.sampleValue;
+			Set<String> distinctSet = new HashSet<String>();
+			try 
+			{
+				st = Main.connection.createStatement();
+				rs = st.executeQuery(querySampleDistinct);
 
+				while (rs.next()) 
+				{
+					String next = rs.getString(1);
+					if (next != null) 
+					{
+						bloom.add(next);
+						distinctSet.add(next);
+					}
+				}
+				rs.close();
+				st.close();
+
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+			sampleDistinctCount = distinctSet.size();
+			if(sampleDistinctCount == 0)
+			{
+				sampleDistinctCount = 0;
+			}
+			for (int i = 0; i < Main.table1NoOfAttrs; ++i) {
+				if (Main.dataTypeCompatibilityMatrix[i][j]) {
+					String src = Main.table1AttrNames[i];
+					// have to consider both pairs
+					double support = sparseSupportWithTargetScalingBloom(R, src, S,	dest, m, bloom,sampleDistinctCount,completeDistinctCount);
+					Main.all.add(new Pair(src, dest, support));
+				}
+			}
+		}
+
+		Collections.sort(Main.all);
+		if(Main.debugMode)
+		{
+			for (Pair cur : Main.all) {
+				System.out.println(cur.toString());
+			}
+		}
+
+		// What threshold value to set - to be studied. 10% is okay?
+
+		
+		System.out.println("<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<");
+		System.out.println("Using Target Scaling with Both Sampling + bloom filter");
+		System.out.println("pairs which satisfy support threshold : "
+				+ Main.threshold);
+
+		for (Pair cur : Main.all) {
+			if (cur.support >= Main.threshold) {
+				System.out.println(cur.toString());
+			}
+		}
+
+		System.out.println(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>");
+		Main.all.clear();
+	}
+	
+
+	public static void doStep3WithTargetScalingWithoutBloom() 
+	{
+		String R = Main.table1Name;
+		String S = Main.table2Name;
+		
+		// Sampling percentage
+		double m = Main.sampleValue;
+		for (int j = 0; j < Main.table2NoOfAttrs; ++j) 
+		{
+			int completeDistinctCount = 0;
+			Statement st;
+			ResultSet rs;
+			String dest = Main.table2AttrNames[j];
+			
+			//1. Find distinct count of complete relation using query.
+			
+			String queryDistCnt = "select count(distinct " + dest + " ) from " + S ;
+			
+			try 
+			{
+				st = Main.connection.createStatement();
+				rs = st.executeQuery(queryDistCnt);
+				if(rs.next())
+				  completeDistinctCount = Integer.parseInt(rs.getString(1));
+				rs.close();
+				st.close();
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+			
+			
+			for (int i = 0; i < Main.table1NoOfAttrs; ++i) {
+				if (Main.dataTypeCompatibilityMatrix[i][j]) {
+					String src = Main.table1AttrNames[i];
+					// have to consider both pairs
+					double support = sparseSupportWithTargetScaling(R, src, S,	dest, m,completeDistinctCount);
+					Main.all.add(new Pair(src, dest, support));
+				}
+			}
+		}
+
+		Collections.sort(Main.all);
+		if(Main.debugMode)
+		{
+			for (Pair cur : Main.all) {
+				System.out.println(cur.toString());
+			}
+		}
+
+		// What threshold value to set - to be studied. 10% is okay?
+
+		
+		System.out.println("<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<");
+		System.out.println("Using Target Scaling with Both Sampling");
+		System.out.println("pairs which satisfy support threshold : "
+				+ Main.threshold);
+
+		for (Pair cur : Main.all) {
+			if (cur.support >= Main.threshold) {
+				System.out.println(cur.toString());
+			}
+		}
+
+		System.out.println(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>");
+
+	}
+
+	
+	
+	private static double sparseSupportWithTargetScalingBloom(String source,String sourceName,
+			String target, String targetName,  double m,
+			BloomFilter<String> bloom,int sampleDistinctCount,int completeDistinctCount) 
+	{
+	
+		double support = 0;
+
+		String querySource = "select " + sourceName + " from " + source
+				+ " where random() < " + m;
+
+		Statement st;
+		ResultSet rs;
+		try 
+		{
+			st = Main.connection.createStatement();
+			rs = st.executeQuery(querySource);
+
+			
+			while (rs.next()) 
+			{
+				String nxt = rs.getString(1);
+				if(bloom.contains(nxt))
+					support++;		
+			}
+			rs.close();
+			
+			support = support * (1 / m);
+			// Modify to also take target scaling into account
+
+			if(sampleDistinctCount != 0)
+				support *= (completeDistinctCount / sampleDistinctCount);
+			
+//			System.out.println("sparseSupportWithTargetScalingWithBloom :" + support
+//					+ ", sampling: " + m);
+
+			rs.close();
+			st.close();
+			
+			return support;
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return -1;
 	}
 
 	public static void doStep3WithActualSupport() {
@@ -558,7 +773,7 @@ public class ProcessData {
 		String S = Main.table2Name;
 		// Sampling percentage
 		List<Pair> all = new ArrayList<Pair>();
-		double m = 0.1;
+		double m = Main.sampleValue;
 		for (int i = 0; i < Main.table1NoOfAttrs; ++i) {
 			for (int j = 0; j < Main.table2NoOfAttrs; ++j) {
 				if (Main.dataTypeCompatibilityMatrix[i][j]) {
@@ -572,25 +787,28 @@ public class ProcessData {
 		}
 
 		Collections.sort(all);
-		/*
-		 * for (Pair cur : all) { System.out.println(cur.toString()); }
-		 */
+		
+		if(Main.debugMode)
+		{
+			for (Pair cur : all) { System.out.println(cur.toString()); }
+		}
+		 
 
 		// What threshold value to set - to be studied. 10% is okay?
 
+		
+		System.out.println("<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<");
 		System.out.println("Using actual support method");
-		System.out
-				.println("========================================================");
 		System.out.println("pairs which satisfy support threshold : "
 				+ Main.threshold);
 
-		for (Pair cur : all) {
+		for (Pair cur : all) 
+		{
 			if (cur.support >= Main.threshold) {
 				System.out.println(cur.toString());
 			}
 		}
-		System.out
-		.println("========================================================");
+		System.out.println(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>");
 
 	}
 }
