@@ -92,6 +92,7 @@ c_comment vs o_comment
 (c_address,o_comment) =>0.0
 (c_phone,o_comment) =>0.0
 (c_mktsegment,o_comment) =>0.0
+
 <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 Using Target Scaling with Both Sampling + bloom filter
 pairs which satisfy support threshold : 15000
