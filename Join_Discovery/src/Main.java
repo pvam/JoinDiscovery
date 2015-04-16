@@ -18,13 +18,13 @@ public class Main {
 	static String[] table1AttrTypes, table1AttrNames;
 	static String[] table2AttrTypes, table2AttrNames;
 
-	static String table1Name = "customer";
-	static String table2Name = "orders";
+	static String table1Name = "nation";
+	static String table2Name = "region";
 
 	static List<Pair> all;
 	public static double fpProbability = 0.1;
-	public static int targetrelSize = 1500000;
-	public static int threshold = 15000;// (int) (targetrelSize * 0.1);
+	public static int targetrelSize = 5;
+	public static int threshold = 1;// (int) (targetrelSize * 0.1);
 	public static double sampleValue = 0.2;
 	public static final boolean debugMode = true;
 
@@ -61,18 +61,21 @@ public class Main {
 	public static void main(String... args) {
 		init();
 		ProcessData.doStep1();
+		ProcessData.doStep3WithActualSupportGeneric();
+
+
 		// TODO: Yet to be implemented
 		// ProcessData.doStep2();
 		// printData();
-		System.out.printf("\n\n");
+//		System.out.printf("\n\n");
 		// ProcessData.doStep3WithActualSupport();
 
-		System.out.printf("\n\n");
+//		System.out.printf("\n\n");
 		// ProcessData.doStep3WithBloom();
-		System.out.printf("\n\n");
-		ProcessData.doStep3WithTargetScaling();
+//		System.out.printf("\n\n");
+		// ProcessData.doStep3WithTargetScaling();
 
-		System.out.printf("\n\n");
+//		System.out.printf("\n\n");
 		// ProcessData.doStep3WithTargetScalingWithoutBloom();
 		// ProcessData.Bifocal_Sampling();
 	}
