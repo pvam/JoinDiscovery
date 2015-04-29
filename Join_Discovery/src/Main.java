@@ -8,37 +8,76 @@ import java.util.List;
 
 public class Main {
 
-	static String databaseURL = "jdbc:postgresql://localhost:5432/health";
-	static String databaseUser = "postgres";
-	static String databasePassword = "a";
+	static String databaseURL = "jdbc:postgresql://localhost:5432/tpch";
+	static String databaseUser = "rajmohan";
+	static String databasePassword = "";
 	static Connection connection;
 	static boolean[][] dataTypeCompatibilityMatrix;
 	static int table1NoOfAttrs;
 	static int table2NoOfAttrs;
 	static String[] table1AttrTypes, table1AttrNames;
 	static String[] table2AttrTypes, table2AttrNames;
-
-	static String table1Name = "nation";
-	static String table2Name = "region";
-
 	static List<Pair> all;
+	
+	// CONFIGURATION PARAMETERS TO BE SET 
+	static String table1Name = "supplier";
+	static String table2Name = "partsupp";
+	public static double sampleValue = 0.1;
+	
+	// END OF CONFIGURATION PARAMETERS
+	public static int expRunCnt = 1;
 	public static double fpProbability = 0.1;
-	public static int targetrelSize = 5;
-	public static int threshold = 1;// (int) (targetrelSize * 0.1);
-	public static double sampleValue = 0.2;
+	public static String fileActual = "fileActual" ,fileEstimated = "fileEstimated";
+	public static ResultFileWriter resFile;
+	public static int targetrelSize;
+	public static int threshold;             // (int) (targetrelSize * 0.1);
+	public static int flag;
+	public static boolean isActual;
 	public static final boolean debugMode = true;
-
+	
 	public static void init() {
+		
 		connectDB();
+		
 		table1NoOfAttrs = getNoOfAttributes(table1Name);
 		table2NoOfAttrs = getNoOfAttributes(table2Name);
-		// System.out.println(noOfAttrInTable1 + "  " + noOfAttrInTable2);
+		
+		targetrelSize = getTargetRelSize(table2Name);
+		threshold = (int) Math.ceil((getTargetRelSize(table1Name) * 0.1));
+		
+		//file objects
+		resFile= new ResultFileWriter(fileActual,fileEstimated);
+		
 		table1AttrTypes = new String[table1NoOfAttrs];
 		table2AttrTypes = new String[table2NoOfAttrs];
 		table1AttrNames = new String[table1NoOfAttrs];
 		table2AttrNames = new String[table2NoOfAttrs];
 		all = new ArrayList<Pair>();
 		dataTypeCompatibilityMatrix = new boolean[table1NoOfAttrs][table2NoOfAttrs];
+		
+	}
+
+	private static int getTargetRelSize(String tableName) 
+	{
+		Statement st;
+		ResultSet rs;
+		int cnt = -1;
+		
+		try {
+			
+			st = connection.createStatement();
+			rs = st.executeQuery("select count(*) from " + tableName);
+			
+			if (rs.next()) {
+				cnt = Integer.parseInt(rs.getString(1));
+			}
+			
+			rs.close();
+			st.close();
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+		return cnt;
 	}
 
 	private static int getNoOfAttributes(String tableName) {
@@ -60,10 +99,20 @@ public class Main {
 
 	public static void main(String... args) {
 		init();
+		
 		ProcessData.doStep1();
-		ProcessData.doStep3WithActualSupportGeneric();
+		
+		isActual = true;
+//		ProcessData.doStep3Generic();
+		
+//		isActual = false; flag = 1;
+//		ProcessData.doStep3Generic();
+		
+		isActual = false; flag = 2;
+		ProcessData.doStep3Generic();
 
-
+		
+		resFile.close();
 		// TODO: Yet to be implemented
 		// ProcessData.doStep2();
 		// printData();
