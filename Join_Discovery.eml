@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<component inheritJdk="true">
+	<exclude-output/>
+	<contentEntry url="file://$MODULE_DIR$"/>
+	<lib name="bloom-filter-1.0.3.jar" scope="COMPILE">
+		<relative-module-cls project-related="jar://$PROJECT_DIR$/jars/bloom-filter-1.0.3.jar!/"/>
+	</lib>
+	<lib name="postgresql-9.4-1200.jdbc4.jar" scope="COMPILE">
+		<relative-module-cls project-related="jar://$PROJECT_DIR$/jars/postgresql-9.4-1200.jdbc4.jar!/"/>
+	</lib>
+</component>
