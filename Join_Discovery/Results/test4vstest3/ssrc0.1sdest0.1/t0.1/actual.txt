@@ -1,0 +1,74 @@
+
+Candidates
+[4] , [6] ,Support = 99.95%
+[4] , [3] ,Support = 87.15%
+[5] , [5] ,Support = 42.87%
+[3] , [3] ,Support = 0.54%
+[3] , [6] ,Support = 0.13%
+[7] , [5] ,Support = 0.05%
+[2] , [2] ,Support = 0.03%
+[0] , [5] ,Support = 0%
+[1] , [0] ,Support = 0%
+[1] , [1] ,Support = 0%
+[1] , [2] ,Support = 0%
+[1] , [3] ,Support = 0%
+[1] , [4] ,Support = 0%
+[1] , [6] ,Support = 0%
+[1] , [7] ,Support = 0%
+[1] , [8] ,Support = 0%
+[1] , [9] ,Support = 0%
+[1] , [10] ,Support = 0%
+[2] , [0] ,Support = 0%
+[2] , [1] ,Support = 0%
+[2] , [3] ,Support = 0%
+[2] , [4] ,Support = 0%
+[2] , [6] ,Support = 0%
+[2] , [7] ,Support = 0%
+[2] , [8] ,Support = 0%
+[2] , [9] ,Support = 0%
+[2] , [10] ,Support = 0%
+[3] , [0] ,Support = 0%
+[3] , [1] ,Support = 0%
+[3] , [2] ,Support = 0%
+[3] , [4] ,Support = 0%
+[3] , [7] ,Support = 0%
+[3] , [8] ,Support = 0%
+[3] , [9] ,Support = 0%
+[3] , [10] ,Support = 0%
+[4] , [0] ,Support = 0%
+[4] , [1] ,Support = 0%
+[4] , [2] ,Support = 0%
+[4] , [4] ,Support = 0%
+[4] , [7] ,Support = 0%
+[4] , [8] ,Support = 0%
+[4] , [9] ,Support = 0%
+[4] , [10] ,Support = 0%
+[6] , [0] ,Support = 0%
+[6] , [1] ,Support = 0%
+[6] , [2] ,Support = 0%
+[6] , [3] ,Support = 0%
+[6] , [4] ,Support = 0%
+[6] , [6] ,Support = 0%
+[6] , [7] ,Support = 0%
+[6] , [8] ,Support = 0%
+[6] , [9] ,Support = 0%
+[6] , [10] ,Support = 0%
+
+Frequents
+[4] , [6] ,Support = 99.95%
+[4] , [3] ,Support = 87.15%
+[5] , [5] ,Support = 42.87%
+
+Candidates
+[4, 5] , [6, 5] ,Support = 42.87%
+[4, 5] , [3, 5] ,Support = 9.09%
+
+Frequents
+[4, 5] , [6, 5] ,Support = 42.87%
+
+
+Final Join Pairs: count = 4
+[4] , [6] ,Support = 99.95%
+[4] , [3] ,Support = 87.15%
+[5] , [5] ,Support = 42.87%
+[4, 5] , [6, 5] ,Support = 42.87%

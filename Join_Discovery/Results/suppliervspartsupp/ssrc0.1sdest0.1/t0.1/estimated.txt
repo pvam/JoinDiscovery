@@ -1,0 +1,63 @@
+Source Attributes List
+s_suppkey  s_name  s_address  s_nationkey  s_phone  s_acctbal  s_comment  
+
+Target Attributes List
+ps_partkey  ps_suppkey  ps_availqty  ps_supplycost  ps_comment  
+Datatype compatibility matrix
+T T T F F 
+F F F F T 
+F F F F T 
+T T T F F 
+F F F F T 
+F F F T F 
+F F F F T 
+
+Pruned Out Percentage = 68.57142857142857
+Candidates
+[3] , [0] ,Support = 100% {Sanity bound}
+[0] , [0] ,Support = 100% {Sanity bound}
+[0] , [1] ,Support = 100% {Sanity bound}
+[0] , [2] ,Support = 99.36%
+[3] , [1] ,Support = 96.2%
+[3] , [2] ,Support = 95.58%
+[5] , [3] ,Support = 10.65%
+[1] , [4] ,Support = 0%
+[2] , [4] ,Support = 0%
+[4] , [4] ,Support = 0%
+[6] , [4] ,Support = 0%
+
+Frequents
+[3] , [0] ,Support = 100% {Sanity bound}
+[0] , [0] ,Support = 100% {Sanity bound}
+[0] , [1] ,Support = 100% {Sanity bound}
+[0] , [2] ,Support = 99.36%
+[3] , [1] ,Support = 96.2%
+[3] , [2] ,Support = 95.58%
+[5] , [3] ,Support = 10.65%
+
+Candidates
+[0, 3] , [1, 2] ,Support = 1.98%
+[0, 3] , [2, 1] ,Support = 1%
+[3, 0] , [0, 1] ,Support = 0%
+[3, 0] , [0, 2] ,Support = 0%
+[3, 5] , [0, 3] ,Support = 0%
+[0, 3] , [0, 1] ,Support = 0%
+[0, 3] , [0, 2] ,Support = 0%
+[0, 5] , [0, 3] ,Support = 0%
+[0, 5] , [1, 3] ,Support = 0%
+[0, 5] , [2, 3] ,Support = 0%
+[3, 5] , [1, 3] ,Support = 0%
+[3, 5] , [2, 3] ,Support = 0%
+
+Frequents
+ Empty
+
+
+Final Join Pairs: count = 7
+[3] , [0] ,Support = 100% {Sanity bound}
+[0] , [0] ,Support = 100% {Sanity bound}
+[0] , [1] ,Support = 100% {Sanity bound}
+[0] , [2] ,Support = 99.36%
+[3] , [1] ,Support = 96.2%
+[3] , [2] ,Support = 95.58%
+[5] , [3] ,Support = 10.65%

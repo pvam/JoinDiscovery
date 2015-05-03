@@ -1,0 +1,41 @@
+
+Candidates
+[0] , [0] ,Support = 100%
+[0] , [1] ,Support = 100%
+[0] , [2] ,Support = 99.99%
+[3] , [0] ,Support = 95.8%
+[3] , [1] ,Support = 95.8%
+[3] , [2] ,Support = 95.8%
+[5] , [3] ,Support = 9.16%
+[1] , [4] ,Support = 0%
+[2] , [4] ,Support = 0%
+[4] , [4] ,Support = 0%
+[6] , [4] ,Support = 0%
+
+Frequents
+[0] , [0] ,Support = 100%
+[0] , [1] ,Support = 100%
+[0] , [2] ,Support = 99.99%
+[3] , [0] ,Support = 95.8%
+[3] , [1] ,Support = 95.8%
+[3] , [2] ,Support = 95.8%
+
+Candidates
+[0, 3] , [1, 2] ,Support = 0.96%
+[0, 3] , [2, 1] ,Support = 0.86%
+[0, 3] , [1, 0] ,Support = 0.05%
+[0, 3] , [2, 0] ,Support = 0.05%
+[0, 3] , [0, 1] ,Support = 0.03%
+[0, 3] , [0, 2] ,Support = 0.03%
+
+Frequents
+ Empty
+
+
+Final Join Pairs: count = 6
+[0] , [0] ,Support = 100%
+[0] , [1] ,Support = 100%
+[0] , [2] ,Support = 99.99%
+[3] , [0] ,Support = 95.8%
+[3] , [1] ,Support = 95.8%
+[3] , [2] ,Support = 95.8%
